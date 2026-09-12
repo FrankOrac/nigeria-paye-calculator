@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body { @apply min-w-[320px] bg-[#f7faf8] font-sans text-slate-900 antialiased; }
+  button, input, select { font: inherit; }
+}
+
+@layer components {
+  .surface { @apply rounded-3xl border border-emerald-950/[0.07] bg-white shadow-card; }
+  .input-control { @apply h-14 w-full rounded-xl border border-slate-200 bg-white px-4 text-base font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10; }
+}
