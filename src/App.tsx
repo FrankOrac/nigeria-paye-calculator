@@ -12,7 +12,6 @@ import {
   Minus,
   RefreshCcw,
   ShieldCheck,
-  Sparkles,
   WalletCards,
 } from 'lucide-react'
 import { calculatePAYE, taxBands, type PAYEInput, type SalaryFrequency } from './paye'
@@ -167,10 +166,7 @@ export default function App() {
           <div className="absolute -left-24 top-0 -z-10 h-72 w-72 rounded-full bg-emerald-200/30 blur-3xl" />
           <div className="absolute right-0 top-20 -z-10 h-52 w-52 rounded-full bg-lime-100/70 blur-3xl" />
           <div className="mx-auto max-w-3xl text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-700/10 bg-white px-3 py-1.5 text-xs font-bold text-emerald-800 shadow-sm">
-              <Sparkles className="h-3.5 w-3.5" /> Clear, progressive PAYE estimates
-            </div>
-            <h1 className="mt-6 font-serif text-4xl font-semibold leading-[1.04] tracking-[-0.055em] text-[#102d28] sm:text-6xl">
+            <h1 className="font-serif text-4xl font-semibold leading-[1.04] tracking-[-0.055em] text-[#102d28] sm:text-6xl">
               Calculate Your Nigerian PAYE
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
@@ -339,7 +335,7 @@ export default function App() {
       </main>
 
       <footer className="bg-[#102d28] text-white">
-        <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8"><div className="flex flex-col justify-between gap-8 border-b border-white/10 pb-8 sm:flex-row"><div><div className="flex items-center gap-2 font-bold"><Landmark className="h-5 w-5 text-emerald-400" /> Nigeria PAYE Calculator</div><p className="mt-2 text-sm text-white/60">Understand your salary. Understand your tax.</p></div><p className="max-w-md text-sm leading-6 text-white/55">This calculator is provided for educational and estimation purposes only and does not constitute tax, legal or financial advice. Actual PAYE may vary based on applicable legislation, deductions, reliefs and individual payroll circumstances.</p></div><p className="pt-6 text-xs text-white/45">© 2026 Nigeria PAYE Calculator</p></div>
+        <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8"><div className="flex flex-col justify-between gap-8 border-b border-white/10 pb-8 sm:flex-row"><div><div className="flex items-center gap-2 font-bold"><Landmark className="h-5 w-5 text-emerald-400" /> Nigeria PAYE Calculator</div><p className="mt-2 text-sm text-white/60">Understand your salary. Understand your tax.</p></div><p className="max-w-md text-sm leading-6 text-white/55">This calculator is provided for educational and estimation purposes only and does not constitute tax, legal or financial advice. Actual PAYE may vary based on applicable legislation, deductions, reliefs and individual payroll circumstances.</p></div><div className="flex flex-col gap-2 pt-6 text-xs text-white/45 sm:flex-row sm:items-center sm:justify-between"><p>© 2026 Nigeria PAYE Calculator</p><p>Built by <a href="https://oracdev-tech.vercel.app" target="_blank" rel="noreferrer" className="font-semibold text-emerald-300 transition hover:text-emerald-200">Oracdev Tech</a> for educational purposes.</p></div></div>
       </footer>
     </div>
   )
