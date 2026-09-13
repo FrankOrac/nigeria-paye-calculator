@@ -5,7 +5,8 @@ export interface PAYEInput {
   frequency: SalaryFrequency
   pensionType: 'percent' | 'amount'
   pensionValue: number
-  otherReliefs: number
+  otherEligibleDeductions: number
+  annualRentPaid: number
 }
 
 export interface TaxBandBreakdown {
@@ -21,10 +22,10 @@ export interface PAYEResult {
   annualTaxableIncome: number
   annualPAYE: number
   monthlyPAYE: number
-  previousMonthlyPAYE: number
-  monthlyDifference: number
   estimatedMonthlyTakeHome: number
   annualPensionContribution: number
+  otherEligibleDeductions: number
+  rentRelief: number
   taxBandBreakdown: TaxBandBreakdown[]
 }
 
@@ -37,7 +38,11 @@ const TAX_BANDS = [
   { label: 'Above ₦50,000,000', limit: Number.POSITIVE_INFINITY, rate: 0.25 },
 ] as const
 
-/** Calculates an indicative PAYE estimate using the displayed 2026 progressive bands. */
+/**
+ * Calculates an indicative PAYE estimate using the Nigeria Tax Act, 2025
+ * progressive rates effective from 1 January 2026. Rent relief is 20% of
+ * declared annual rent, capped at ₦500,000.
+ */
 export function calculatePAYE(input: PAYEInput): PAYEResult {
   const cleanSalary = Math.max(0, Number.isFinite(input.salary) ? input.salary : 0)
   const annualGrossIncome = input.frequency === 'monthly' ? cleanSalary * 12 : cleanSalary
@@ -45,8 +50,10 @@ export function calculatePAYE(input: PAYEInput): PAYEResult {
   const annualPensionContribution = input.pensionType === 'percent'
     ? annualGrossIncome * Math.min(cleanPensionValue, 100) / 100
     : Math.min(cleanPensionValue, annualGrossIncome)
-  const otherReliefs = Math.max(0, Number.isFinite(input.otherReliefs) ? input.otherReliefs : 0)
-  const annualTaxableIncome = Math.max(0, annualGrossIncome - annualPensionContribution - otherReliefs)
+  const otherEligibleDeductions = Math.max(0, Number.isFinite(input.otherEligibleDeductions) ? input.otherEligibleDeductions : 0)
+  const annualRentPaid = Math.max(0, Number.isFinite(input.annualRentPaid) ? input.annualRentPaid : 0)
+  const rentRelief = Math.min(annualRentPaid * 0.2, 500_000)
+  const annualTaxableIncome = Math.max(0, annualGrossIncome - annualPensionContribution - otherEligibleDeductions - rentRelief)
 
   let remaining = annualTaxableIncome
   const taxBandBreakdown = TAX_BANDS.map((band) => {
@@ -58,8 +65,6 @@ export function calculatePAYE(input: PAYEInput): PAYEResult {
 
   const annualPAYE = taxBandBreakdown.reduce((total, band) => total + band.tax, 0)
   const monthlyPAYE = annualPAYE / 12
-  const previousMonthlyPAYE = annualGrossIncome / 12 * 0.075
-  const monthlyDifference = monthlyPAYE - previousMonthlyPAYE
   const estimatedMonthlyTakeHome = annualGrossIncome / 12 - monthlyPAYE - annualPensionContribution / 12
 
   return {
@@ -67,10 +72,10 @@ export function calculatePAYE(input: PAYEInput): PAYEResult {
     annualTaxableIncome,
     annualPAYE,
     monthlyPAYE,
-    previousMonthlyPAYE,
-    monthlyDifference,
     estimatedMonthlyTakeHome,
     annualPensionContribution,
+    otherEligibleDeductions,
+    rentRelief,
     taxBandBreakdown,
   }
 }

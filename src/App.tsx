@@ -1,15 +1,11 @@
 import { useMemo, useRef, useState } from 'react'
 import {
-  ArrowDownRight,
-  ArrowUpRight,
   BadgeCheck,
   Calculator,
   ChevronDown,
   CircleHelp,
-  Coins,
   Info,
   Landmark,
-  Minus,
   RefreshCcw,
   ShieldCheck,
   WalletCards,
@@ -26,6 +22,10 @@ const FAQS = [
   {
     question: 'Is PAYE calculated on my gross salary?',
     answer: 'PAYE is calculated on taxable income. Applicable deductions and reliefs, such as eligible pension contributions, can reduce the income that is taxed.',
+  },
+  {
+    question: 'Which 2026 deductions and reliefs can I include?',
+    answer: 'The Nigeria Tax Act, 2025 lists qualifying payments such as pension, National Housing Fund, National Health Insurance Scheme, qualifying life assurance or annuity premiums, owner-occupied home-loan interest, and rent relief. Enter only amounts that apply to you and that you can support with the required records.',
   },
   {
     question: 'Will everyone pay the same percentage?',
@@ -96,7 +96,8 @@ export default function App() {
   const [showDetails, setShowDetails] = useState(false)
   const [pensionType, setPensionType] = useState<'percent' | 'amount'>('percent')
   const [pensionValue, setPensionValue] = useState('')
-  const [otherReliefs, setOtherReliefs] = useState('')
+  const [annualRentPaid, setAnnualRentPaid] = useState('')
+  const [otherEligibleDeductions, setOtherEligibleDeductions] = useState('')
   const [showSalaryError, setShowSalaryError] = useState(false)
   const calculatorRef = useRef<HTMLElement>(null)
 
@@ -109,10 +110,11 @@ export default function App() {
     frequency,
     pensionType,
     pensionValue: valueFromInput(pensionValue),
-    otherReliefs: valueFromInput(otherReliefs),
+    annualRentPaid: valueFromInput(annualRentPaid),
+    otherEligibleDeductions: valueFromInput(otherEligibleDeductions),
   }
   const result = useMemo(() => hasValidSalary ? calculatePAYE(input) : null, [
-    hasValidSalary, salaryNumber, frequency, pensionType, pensionValue, otherReliefs,
+    hasValidSalary, salaryNumber, frequency, pensionType, pensionValue, annualRentPaid, otherEligibleDeductions,
   ])
 
   const salaryLabel = frequency === 'monthly' ? 'Gross Monthly Salary' : 'Gross Annual Salary'
@@ -139,7 +141,8 @@ export default function App() {
     setFrequency('monthly')
     setPensionType('percent')
     setPensionValue('')
-    setOtherReliefs('')
+    setAnnualRentPaid('')
+    setOtherEligibleDeductions('')
     setShowDetails(false)
     setShowSalaryError(false)
   }
@@ -170,7 +173,7 @@ export default function App() {
               Calculate Your Nigerian PAYE
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
-              Enter your salary and payroll details to estimate your PAYE, monthly deduction and take-home pay under the progressive tax system.
+              Enter your salary and payroll details to estimate your PAYE and pay after PAYE under the 2026 progressive tax bands.
             </p>
             <button type="button" onClick={goToCalculator} className="mt-8 inline-flex h-13 items-center gap-2 rounded-xl bg-emerald-700 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-800/20 transition hover:-translate-y-0.5 hover:bg-emerald-800">
               <Calculator className="h-4.5 w-4.5" /> Calculate My PAYE
@@ -233,7 +236,7 @@ export default function App() {
                   <ChevronDown className={`h-5 w-5 shrink-0 text-emerald-700 transition-transform ${showDetails ? 'rotate-180' : ''}`} />
                 </button>
                 {showDetails && (
-                  <div className="grid gap-5 border-t border-emerald-900/10 p-4 pt-5 md:grid-cols-2">
+                  <div className="grid gap-5 border-t border-emerald-900/10 p-4 pt-5 md:grid-cols-3">
                     <div>
                       <div className="mb-2 flex items-center justify-between gap-3"><label htmlFor="pension" className="text-sm font-bold text-slate-800">Pension contribution</label><span className="text-xs text-slate-500">Optional</span></div>
                       <div className="flex rounded-xl border border-slate-200 bg-white p-1">
@@ -245,12 +248,17 @@ export default function App() {
                         <input id="pension" type="number" min="0" inputMode="decimal" value={pensionValue} onChange={(event) => setPensionValue(event.target.value)} placeholder={pensionType === 'percent' ? 'e.g. 8' : 'e.g. 288000'} className={`input-control ${pensionType === 'amount' ? 'pl-9' : ''}`} />
                         {pensionType === 'percent' && <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 font-bold text-slate-500">%</span>}
                       </div>
-                      <p className="mt-2 text-xs text-slate-500">Enter your employee contribution if it applies. Leave blank if unsure.</p>
+                      <p className="mt-2 text-xs text-slate-500">The percentage is applied to the salary entered. Use your actual employee contribution where the pension base differs from gross pay.</p>
                     </div>
                     <div>
-                      <label htmlFor="reliefs" className="mb-2 block text-sm font-bold text-slate-800">Other applicable deductions / reliefs <span className="font-normal text-slate-500">(annual)</span></label>
-                      <div className="relative"><span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-500">₦</span><input id="reliefs" type="number" min="0" inputMode="decimal" value={otherReliefs} onChange={(event) => setOtherReliefs(event.target.value)} placeholder="e.g. 50000" className="input-control pl-9" /></div>
-                      <p className="mt-2 text-xs text-slate-500">Tax reliefs reduce taxable income; they are not treated as a payroll cash deduction in take-home pay.</p>
+                      <label htmlFor="rent" className="mb-2 block text-sm font-bold text-slate-800">Annual rent paid <span className="font-normal text-slate-500">(optional)</span></label>
+                      <div className="relative"><span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-500">₦</span><input id="rent" type="number" min="0" inputMode="decimal" value={annualRentPaid} onChange={(event) => setAnnualRentPaid(event.target.value)} placeholder="e.g. 1200000" className="input-control pl-9" /></div>
+                      <p className="mt-2 text-xs text-slate-500">Rent relief is 20% of declared annual rent, capped at ₦500,000.</p>
+                    </div>
+                    <div>
+                      <label htmlFor="deductions" className="mb-2 block text-sm font-bold text-slate-800">Other eligible deductions <span className="font-normal text-slate-500">(annual)</span></label>
+                      <div className="relative"><span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-500">₦</span><input id="deductions" type="number" min="0" inputMode="decimal" value={otherEligibleDeductions} onChange={(event) => setOtherEligibleDeductions(event.target.value)} placeholder="e.g. 50000" className="input-control pl-9" /></div>
+                      <p className="mt-2 text-xs text-slate-500">For documented NHF, NHIS, qualifying life cover or owner-occupied home-loan interest, where applicable.</p>
                     </div>
                   </div>
                 )}
@@ -262,7 +270,7 @@ export default function App() {
                 </button>
                 <button type="button" onClick={reset} className="inline-flex h-14 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"><RefreshCcw className="h-4 w-4" /> Reset Calculator</button>
               </div>
-              <p className="mt-4 flex items-start gap-2 text-xs leading-5 text-slate-500"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" /> This calculator provides an estimate for educational and payroll-planning purposes. Your employer’s final PAYE calculation may differ based on applicable deductions, reliefs and individual circumstances.</p>
+              <p className="mt-4 flex items-start gap-2 text-xs leading-5 text-slate-500"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" /> This educational estimate annualises the salary you enter and does not determine whether a deduction or relief claim qualifies. Your employer’s final PAYE may differ based on your pay components, records and individual circumstances.</p>
             </div>
           </div>
         </section>
@@ -283,26 +291,16 @@ export default function App() {
               <MetricCard label="Annual Gross Income" value={currency(result.annualGrossIncome)} tone="light" />
               <MetricCard label="Estimated Annual PAYE" value={currency(result.annualPAYE)} tone="dark" />
               <MetricCard label="Estimated Monthly PAYE" value={currency(result.monthlyPAYE)} tone="green" />
-              <MetricCard label="Estimated Monthly Take-Home" value={currency(result.estimatedMonthlyTakeHome)} tone="light" />
+              <MetricCard label="Monthly Pay After PAYE" value={currency(result.estimatedMonthlyTakeHome)} tone="light" />
             </div>
-            <p className="mt-5 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-950"><span className="font-bold">Your monthly view:</span> Based on the information you entered, your estimated monthly PAYE is {currency(result.monthlyPAYE)}, leaving approximately {currency(result.estimatedMonthlyTakeHome)} after PAYE{result.annualPensionContribution > 0 ? ' and your stated pension contribution' : ''}.</p>
+            <p className="mt-5 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-950"><span className="font-bold">Your monthly view:</span> Based on the information you entered, your estimated monthly PAYE is {currency(result.monthlyPAYE)}, leaving approximately {currency(result.estimatedMonthlyTakeHome)} after PAYE{result.annualPensionContribution > 0 ? ' and your stated pension contribution' : ''}. This pay-after-PAYE estimate does not subtract rent or other personal expenses.</p>
           </section>
         )}
 
         {result && (
-          <section className="mx-auto grid max-w-6xl gap-6 px-5 pb-16 lg:grid-cols-[0.9fr_1.4fr] sm:px-8">
-            <div className="surface h-fit p-6">
-              <div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-50 text-emerald-700"><Coins className="h-5 w-5" /></span><div><h2 className="font-bold tracking-[-0.03em] text-[#102d28]">How your deduction compares</h2><p className="mt-0.5 text-xs text-slate-500">A like-for-like monthly comparison</p></div></div>
-              <div className="mt-6 space-y-4 text-sm">
-                <div className="flex items-center justify-between gap-4"><span className="text-slate-600">Previous 7.5% comparison</span><strong>{currency(result.previousMonthlyPAYE)}/month</strong></div>
-                <div className="flex items-center justify-between gap-4 rounded-xl bg-emerald-50 px-3 py-3"><span className="font-bold text-emerald-900">Estimated progressive PAYE</span><strong className="text-emerald-800">{currency(result.monthlyPAYE)}/month</strong></div>
-                <div className="flex items-center justify-between gap-4 border-t border-slate-100 pt-4"><span className="font-semibold text-slate-700">Difference</span><strong className={`inline-flex items-center gap-1 ${result.monthlyDifference > 0 ? 'text-rose-600' : result.monthlyDifference < 0 ? 'text-emerald-700' : 'text-slate-600'}`}>{result.monthlyDifference > 0 ? <ArrowUpRight className="h-4 w-4" /> : result.monthlyDifference < 0 ? <ArrowDownRight className="h-4 w-4" /> : <Minus className="h-4 w-4" />}{result.monthlyDifference > 0 ? '+' : ''}{currency(result.monthlyDifference)}/month</strong></div>
-              </div>
-              <p className="mt-5 text-xs leading-5 text-slate-500">The previous 7.5% comparison is shown only as a comparison against a previous payroll method. It is not a statement of what was legally correct for every employee.</p>
-            </div>
-
+          <section className="mx-auto max-w-6xl px-5 pb-16 sm:px-8">
             <div className="surface overflow-hidden">
-              <div className="border-b border-slate-100 px-6 py-6"><h2 className="text-xl font-bold tracking-[-0.035em] text-[#102d28]">How Your PAYE Was Calculated</h2><p className="mt-1 text-sm text-slate-500">Your annual taxable income is {currency(result.annualTaxableIncome)}. Each band is taxed separately.</p></div>
+              <div className="border-b border-slate-100 px-6 py-6"><h2 className="text-xl font-bold tracking-[-0.035em] text-[#102d28]">How Your PAYE Was Calculated</h2><p className="mt-1 text-sm text-slate-500">Your annual chargeable income is {currency(result.annualTaxableIncome)}. Each band is taxed separately.</p>{(result.annualPensionContribution > 0 || result.otherEligibleDeductions > 0 || result.rentRelief > 0) && <div className="mt-3 flex flex-wrap gap-2 text-xs font-medium text-emerald-900">{result.annualPensionContribution > 0 && <span className="rounded-full bg-emerald-50 px-2.5 py-1">Pension: {currency(result.annualPensionContribution)}</span>}{result.otherEligibleDeductions > 0 && <span className="rounded-full bg-emerald-50 px-2.5 py-1">Other deductions: {currency(result.otherEligibleDeductions)}</span>}{result.rentRelief > 0 && <span className="rounded-full bg-emerald-50 px-2.5 py-1">Rent relief: {currency(result.rentRelief)}</span>}</div>}</div>
               <div className="divide-y divide-slate-100">
                 {result.taxBandBreakdown.map((band) => (
                   <div key={band.label} className={`flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 ${band.applies ? 'bg-emerald-50/70' : 'bg-white opacity-60'}`}>
@@ -326,6 +324,7 @@ export default function App() {
           <div className="mb-6"><p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-700">Reference</p><h2 id="bands-title" className="mt-2 text-3xl font-bold tracking-[-0.05em] text-[#102d28]">2026 Progressive PAYE Tax Bands</h2></div>
           <div className="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white sm:block"><table className="w-full text-left text-sm"><thead className="bg-[#f4faf6] text-xs uppercase tracking-[0.1em] text-slate-500"><tr><th className="px-6 py-4 font-bold">Taxable Income Band</th><th className="px-6 py-4 text-right font-bold">Rate</th></tr></thead><tbody className="divide-y divide-slate-100">{taxBands.map((band) => <tr key={band.label}><td className="px-6 py-4 font-semibold text-slate-800">{band.label}</td><td className="px-6 py-4 text-right font-bold text-emerald-700">{Math.round(band.rate * 100)}%</td></tr>)}</tbody></table></div>
           <div className="grid gap-3 sm:hidden">{taxBands.map((band) => <div key={band.label} className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-4"><span className="text-sm font-semibold text-slate-800">{band.label}</span><span className="text-sm font-bold text-emerald-700">{Math.round(band.rate * 100)}%</span></div>)}</div>
+          <p className="mt-4 max-w-3xl text-xs leading-5 text-slate-500">These bands reflect the <a href="https://www.nipc.gov.ng/wp-content/uploads/2025/08/Nigeria-Tax-Act-2025-Gazette.pdf" target="_blank" rel="noreferrer" className="font-semibold text-emerald-800 underline decoration-emerald-300 underline-offset-2 hover:text-emerald-700">Nigeria Tax Act, 2025</a>, effective from 1 January 2026. Eligible deductions must be claimed and may require documentary evidence.</p>
         </section>
 
         <section className="mx-auto max-w-3xl px-5 pb-20 sm:px-8" aria-labelledby="faq-title">
